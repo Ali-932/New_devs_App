@@ -15,6 +15,7 @@ import os
 import time
 
 from app.core.redis_client import redis_client
+from app.core.database_pool import db_pool
 from .api.v1 import (
     users_lightning,
     cities,
@@ -107,6 +108,9 @@ async def lifespan(app: FastAPI):
         logger.warning(f"Redis initialization warning: {e}")
         # Continue without Redis - will use fallback
 
+    # Initialize database connection pool
+    await db_pool.initialize()
+
     # Start cache invalidation listener (only if Redis is connected)
     if redis_client.is_connected:
         asyncio.create_task(cache_invalidation_listener())
@@ -126,6 +130,8 @@ async def lifespan(app: FastAPI):
     # Shutdown async processor
     await async_processor.shutdown()
     logger.info("Async processor shutdown completed")
+
+    await db_pool.close()
 
     # Close connection pool
     try:
