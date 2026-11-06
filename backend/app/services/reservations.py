@@ -2,6 +2,8 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Dict, Any, List, Optional
 
+from fastapi import HTTPException
+
 async def calculate_total_revenue(property_id: str, tenant_id: str, month: Optional[str] = None) -> Dict[str, Any]:
     """
     Aggregates a property's total revenue, all-time by default.
@@ -62,3 +64,4 @@ async def calculate_total_revenue(property_id: str, tenant_id: str, month: Optio
             
     except Exception as e:
         print(f"Database error for {property_id} (tenant: {tenant_id}): {e}")
+        raise HTTPException(status_code=503, detail="Database unavailable")
